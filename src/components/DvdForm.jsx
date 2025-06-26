@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { getDvd, createDvd, updateDvd } from "../services/api";
 import { TextField, Button, Container, Typography, Box } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
+import { format, parseISO } from "date-fns";
 
 const DvdForm = () => {
   const { id } = useParams();
@@ -24,7 +25,17 @@ const DvdForm = () => {
   const fetchDvd = async () => {
     try {
       const response = await getDvd(id);
-      setDvd(response.data);
+      const dvdData = response.data;
+
+      // Formatear la fecha usando date-fns
+      const formattedDate = dvdData.publicationDate
+        ? format(parseISO(dvdData.publicationDate.slice(0, 10)), "yyyy-MM-dd")
+        : "";
+
+      setDvd({
+        ...dvdData,
+        publicationDate: formattedDate,
+      });
     } catch (error) {
       console.error("Error fetching DVD:", error);
     }
@@ -54,71 +65,73 @@ const DvdForm = () => {
   };
 
   return (
-      <Container>
-        <Typography variant="h4" gutterBottom>
-          {id ? "Editar DVD" : "Añadir Nuevo DVD"}
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            label="Título"
-            name="title"
-            value={dvd.title}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        {id ? "Editar DVD" : "Añadir Nuevo DVD"}
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+        <TextField
+          label="Título"
+          name="title"
+          value={dvd.title}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <DatePicker
-            label="Fecha de Publicación"
-            value={dvd.publicationDate}
-            onChange={handleDateChange}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth margin="normal" />
-            )}
-          />
+        <TextField
+          label="Fecha de Publicación"
+          name="publicationDate"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={dvd.publicationDate}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
 
-          <TextField
-            label="Director"
-            name="director"
-            value={dvd.director}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Director"
+          name="director"
+          value={dvd.director}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <TextField
-            label="Género"
-            name="genre"
-            value={dvd.genre}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Género"
+          name="genre"
+          value={dvd.genre}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <TextField
-            label="Duración (minutos)"
-            name="duration"
-            type="number"
-            value={dvd.duration}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Duración (minutos)"
+          name="duration"
+          type="number"
+          value={dvd.duration}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-          >
-            {id ? "Actualizar" : "Guardar"}
-          </Button>
-        </Box>
-      </Container>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt: 3 }}
+        >
+          {id ? "Actualizar" : "Guardar"}
+        </Button>
+      </Box>
+    </Container>
   );
 };
 

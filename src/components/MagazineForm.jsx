@@ -2,14 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { getMagazine, createMagazine, updateMagazine } from "../services/api";
 import { TextField, Button, Container, Typography, Box } from "@mui/material";
-import { DatePicker } from "@mui/x-date-pickers";
+import { format, parseISO } from "date-fns";
 
 const MagazineForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [magazine, setMagazine] = useState({
     title: "",
-    publicationDate: null,
+    publicationDate: new Date(),
     category: "",
     issueNumber: 0,
     publisher: "",
@@ -24,7 +24,18 @@ const MagazineForm = () => {
   const fetchMagazine = async () => {
     try {
       const response = await getMagazine(id);
-      setMagazine(response.data);
+
+      const magazineData = response.data;
+
+      // Formatear la fecha usando date-fns
+      const formattedDate = magazineData.publicationDate
+        ? format(parseISO(magazineData.publicationDate.slice(0, 10)), "yyyy-MM-dd")
+        : "";
+
+      setMagazine({
+        ...magazineData,
+        publicationDate: formattedDate,
+      });
     } catch (error) {
       console.error("Error fetching magazine:", error);
     }
@@ -54,71 +65,73 @@ const MagazineForm = () => {
   };
 
   return (
-      <Container>
-        <Typography variant="h4" gutterBottom>
-          {id ? "Editar Revista" : "Añadir Nueva Revista"}
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
-          <TextField
-            label="Título"
-            name="title"
-            value={magazine.title}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+    <Container>
+      <Typography variant="h4" gutterBottom>
+        {id ? "Editar Revista" : "Añadir Nueva Revista"}
+      </Typography>
+      <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+        <TextField
+          label="Título"
+          name="title"
+          value={magazine.title}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <DatePicker
-            label="Fecha de Publicación"
-            value={magazine.publicationDate}
-            onChange={handleDateChange}
-            renderInput={(params) => (
-              <TextField {...params} fullWidth margin="normal" />
-            )}
-          />
+        <TextField
+          label="Fecha de Publicación"
+          name="publicationDate"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+          value={magazine.publicationDate}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
 
-          <TextField
-            label="Categoría"
-            name="category"
-            value={magazine.category}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Categoría"
+          name="category"
+          value={magazine.category}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <TextField
-            label="Número de Edición"
-            name="issueNumber"
-            type="number"
-            value={magazine.issueNumber}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Número de Edición"
+          name="issueNumber"
+          type="number"
+          value={magazine.issueNumber}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <TextField
-            label="Editorial"
-            name="publisher"
-            value={magazine.publisher}
-            onChange={handleChange}
-            fullWidth
-            margin="normal"
-            required
-          />
+        <TextField
+          label="Editorial"
+          name="publisher"
+          value={magazine.publisher}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
 
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            sx={{ mt: 3 }}
-          >
-            {id ? "Actualizar" : "Guardar"}
-          </Button>
-        </Box>
-      </Container>
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{ mt: 3 }}
+        >
+          {id ? "Actualizar" : "Guardar"}
+        </Button>
+      </Box>
+    </Container>
   );
 };
 
